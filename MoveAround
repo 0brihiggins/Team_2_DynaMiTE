@@ -1,0 +1,64 @@
+#include <Arduino.h>
+#include <MeMegaPi.h>
+#include "MeEEPROM.h"
+#include <Wire.h>
+#include <SoftwareSerial.h>
+
+MeMegaPiDCMotor wheel1(PORT1B);
+MeMegaPiDCMotor wheel2(PORT2B);
+MeMegaPiDCMotor wheel3(PORT3B);
+MeUltrasonicSensor ultraSensor(PORT_6);
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  lookAround();
+}
+
+void turnAround() {
+  wheel1.run(-150);
+  wheel2.run(150);
+  delay(1000);
+  wheel1.stop();
+  wheel2.stop();
+  delay (200);
+  wheel1.run(150);
+  wheel2.run(150);
+  delay(1000);
+  wheel1.stop();
+  wheel2.stop();
+  delay (200);
+  Serial.println("Turn Around");
+  loop();
+}
+
+void checkDistance() {
+  Serial.print("Distance: ");
+  Serial.print(ultraSensor.distanceCm());
+  Serial.println(" cm");
+  loop();
+}
+
+void lookAround() {
+  for (int i=0; i<=6; i++) {
+    wheel3.run(75);
+    delay(100);
+    wheel3.stop();
+    checkDistance();
+  }
+  for (int i=0; i<=6; i++) {
+    wheel3.run(-75);
+    delay(100);
+    wheel3.stop();
+    checkDistance();
+  }
+  lookAround();
+}
+
+void loop() {
+  wheel1.run(150);
+  wheel2.run(-150);
+  if (ultraSensor.distanceCm() < 35) {
+    turnAround();
+  }
+}
