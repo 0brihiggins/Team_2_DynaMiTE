@@ -1,0 +1,81 @@
+#include <MeMegaPi.h>
+#include <Wire.h>
+
+MeMegaPiDCMotor wheel1(PORT1B);
+MeMegaPiDCMotor wheel2(PORT2B);
+MeGyro gyro;
+MeLineFollower lineSensor(PORT_6);
+
+int16_t wheelCompensation = 2;
+int16_t motorSpeed = 30;
+int16_t motorSpeed2 = motorSpeed * wheelCompensation;
+double theta = 0.0;
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  gyro.begin();
+}
+
+void moveStraight() {
+  wheel1.run(motorSpeed2);
+  wheel2.run(-motorSpeed);
+  if(gyro.getAngleZ() < theta) {
+    wheel2.run(-motorSpeed - 5);
+    Serial.print("Low ");
+  }
+  if(gyro.getAngleZ() > theta) {
+    wheel1.run(motorSpeed2 + 5);
+    Serial.print("High ");
+  }
+}
+
+void turnLeft() {
+  wheel1.run(-motorSpeed2);
+  wheel2.run(-motorSpeed);
+}
+
+void turnRight() {
+  wheel1.run(motorSpeed2);
+  wheel2.run(motorSpeed);
+}
+
+void motorStop() {
+  wheel1.stop();
+  wheel2.stop();
+}
+
+void turnToFindLine(int turnDirection) {
+  motorStop();
+  delay(100);
+  if(turnDirection == 0) {
+    turnLeft();
+  }
+  else {
+    turnRight();
+  }
+  delay(50);
+  motorStop();
+  gyro.update();
+  theta = gyro.getAngleZ();
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  gyro.update();
+  int sensorState = lineSensor.readSensors();
+  if (sensorState == S1_IN_S2_IN) {
+    moveStraight();
+  }
+  else if (sensorState == S1_IN_S2_OUT) {
+    turnToFindLine(0);
+  }
+  else if (sensorState == S1_OUT_S2_IN) {
+    turnToFindLine(1);
+  }
+  else {
+    turnToFindLine(0);
+  }
+  Serial.println(gyro.getAngleZ());
+//  delay(50);
+}
