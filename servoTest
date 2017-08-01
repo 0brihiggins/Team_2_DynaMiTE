@@ -1,0 +1,44 @@
+/**
+ * \par Copyright (C), 2012-2016, MakeBlock
+ * @file    Knob.ino
+ * @author  MakeBlock
+ * @version V1.0.0
+ * @date    2015/09/02
+ * @brief   Description: this file is sample code for servo. Servo.h should be 
+ * included before makeblock header file
+ * Function List:
+ * 1. uint8_t Servo::attach()
+ * 2. uint8_t Servo::write()
+ *
+ * \par History:
+ * <pre>
+ * <Author>     <Time>        <Version>      <Descr>
+ * Mark Yan     2015/09/02    1.0.0          rebuild the old lib
+ * </pre>
+ */
+#include "MeMegaPi.h"
+#include <Wire.h>
+#include <SoftwareSerial.h>
+
+//Parts required:Me RJ25 Adapter and two servo 	
+//Me RJ25 Adapter SLOT1 connect servo1,SLOT2 connect servo2,
+//The Me RJ25 Adapter module can connect to the port with yellow tag (PORT_3 to PROT_8). 
+
+MePort port(PORT_5);
+Servo myservo2;  // create servo object to control another servo
+int16_t servo2pin =  port.pin1();//attaches the servo on PORT_3 SLOT2 to the servo object
+MeGyro gyro;
+
+void setup() 
+{ 
+  Serial.begin(9600);
+  gyro.begin();
+  myservo2.attach(servo2pin);  // attaches the servo on servopin2
+} 
+
+void loop() 
+{ 
+  gyro.update();
+  myservo2.write(90 - (gyro.getAngleZ()));
+  Serial.println(90 - (gyro.getAngleZ()));
+} 
