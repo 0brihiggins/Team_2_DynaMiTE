@@ -1,0 +1,32 @@
+#include <MeMegaPi.h>
+#include <Wire.h>
+
+MeMegaPiDCMotor wheel1(PORT1B);
+MeMegaPiDCMotor wheel2(PORT2B);
+MeGyro gyro;
+
+int16_t wheelCompensation = 1.15;
+int16_t motorSpeed = 60;
+int16_t motorSpeed2 = motorSpeed * wheelCompensation;
+double theta = 0.0;
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  gyro.begin();
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  gyro.update();
+  wheel1.run(motorSpeed2);
+  wheel2.run(-motorSpeed);
+  if(gyro.getAngleZ() < theta) {
+    wheel2.run(-motorSpeed - 5);
+    Serial.print("Low ");
+  }
+  if(gyro.getAngleZ() > theta) {
+    wheel1.run(motorSpeed2 + 5);
+    Serial.print("High ");
+  }
+}
